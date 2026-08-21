@@ -1,29 +1,31 @@
 
-#include <stdio.h>
 #include <zephyr/kernel.h>
-#include <zephyr/drivers/gpio.h>
-#include <zephyr/drivers/uart.h>
-#include <zephyr/usb/usb_device.h>
-#include <zephyr/sys/printk.h>
-#include <zephyr/sys/util.h>
-#include <string.h>
 #include <zephyr/console/console.h>
 #include <zephyr/logging/log.h>
-#include <zephyr/console/console.h>
 
 LOG_MODULE_REGISTER(logging);
 
+void log_waiting(void *arg1, void *arg2, void *arg3) {
+	console_getline_init(); 
+
+	while(1) {
+		char *message = console_getline(); 
+		LOG_INF("Mensagem recebida: %s", message); 
+	}
+}
+
+K_THREAD_DEFINE(log_waiting_th, 512, log_waiting, NULL,
+				NULL, NULL, 0, 0, 0);
 
 int main(void)
 {
-	console_getline_init(); 
-	
-	while (1) {
-		LOG_INF("Aguardando mensagem para ser enviada...\n");
-		char* message = console_getline(); 
-		LOG_INF("%s", message); 
-		LOG_INF("Mensagem enviada"); 
+
+	while(1) {
+		LOG_INF("Aguardando mensagem..."); 
 		k_msleep(1000); 
 	}
+	
 	return 0;
 }
+
+
